@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@600&display=swap&text=0123456789%2F%E2%97%8B%C3%97%E6%AD%A3%E8%A7%A3%E7%82%B9%E6%8E%A1%E6%B8%88%E5%90%88%E6%A0%BC" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@600&display=swap&text=0123456789%2F%25%E2%97%8B%C3%97%E6%AD%A3%E8%A7%A3%E7%82%B9%E6%8E%A1%E6%B8%88%E5%90%88%E6%A0%BC" rel="stylesheet">
 <style>
   :root {
     --desk: #e9e6df;
@@ -26,6 +26,11 @@
     --red-bg: #fff1ef;
     --navy: #1f3a6e;
     --navy-bg: #edf1f8;
+    /* 進み具合の色: 合格 / あと1回で合格 / ×印 / まだ / タイルの塗り */
+    --c-a: #f1aea7;
+    --c-m: #93a5c8;
+    --c-n: #e3ddd1;
+    --c-fill: #fbd5d0;
     --mincho: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", serif;
     --gothic: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", "Yu Gothic", "Meiryo", sans-serif;
     --latin: "Century Schoolbook", "Century", "New Century Schoolbook", "TeX Gyre Schola", Georgia, "Times New Roman", serif;
@@ -102,6 +107,60 @@
   .marklist .x { color: var(--navy); font-weight: 700; }
   .marklist .en { font-family: var(--latin); font-weight: 700; flex: 1; min-width: 0; overflow-wrap: anywhere; }
   .dots { color: var(--red); font-size: 11px; letter-spacing: .1em; white-space: nowrap; }
+
+  /* ---- 進み具合（合格した単語の割合） ---- */
+  .option > .opt-body { flex: 1; min-width: 0; }
+  .sbar { display: flex; height: 10px; border-radius: 99px; overflow: hidden; background: var(--c-n); }
+  .sbar > i { display: block; height: 100%; flex: 0 0 auto; }
+  .sbar .p, .sw.p { background: var(--red); }
+  .sbar .g { background: repeating-linear-gradient(-45deg, var(--red) 0 5px, #e86a62 5px 10px); animation: grow .9s .25s ease-out both; }
+  .sbar .a, .sw.a { background: var(--c-a); }
+  .sbar .m, .sw.m { background: var(--c-m); }
+  .sw.n { background: var(--c-n); }
+  .sbar.mini { height: 5px; margin-top: 6px; }
+  .sbar.big { height: 14px; }
+  @keyframes grow { from { width: 0; } }
+
+  .prog { display: flex; align-items: center; gap: 18px; }
+  .ring { flex: 0 0 auto; width: 112px; height: 112px; border-radius: 50%; display: grid; place-items: center; }
+  .ring-in { width: 84px; height: 84px; border-radius: 50%; background: var(--paper); display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; }
+  .ring-in strong { font-family: var(--hand); font-weight: 600; font-size: 34px; color: var(--red); }
+  .ring-in strong span { font-size: 16px; margin-left: 1px; }
+  .ring-in small { font-size: 11px; color: var(--ink-soft); margin-top: 5px; letter-spacing: .1em; }
+  .legend { list-style: none; margin: 0; padding: 0; flex: 1; min-width: 0; font-size: 13px; display: grid; gap: 4px; }
+  .legend li { display: flex; align-items: center; gap: 8px; }
+  .legend .sw { width: 11px; height: 11px; border-radius: 3px; flex: 0 0 auto; }
+  .legend .v { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .legend .v small { font-weight: 400; color: var(--ink-soft); font-size: 11px; margin-left: 1px; }
+  .prog-note { font-size: 12px; color: var(--ink-soft); margin: 10px 0 0; }
+
+  .blocks { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 6px; margin: 0 0 14px; }
+  .blk {
+    --f: 0%;
+    min-height: 54px; padding: 6px 2px 5px; border-radius: 8px; border: 1.5px solid var(--rule);
+    background: linear-gradient(to top, var(--c-fill) var(--f), var(--paper) var(--f));
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; line-height: 1.1;
+  }
+  .blk .r { font-family: var(--latin); font-size: 11px; color: var(--ink-soft); white-space: nowrap; }
+  .blk b { font-family: var(--hand); font-weight: 600; font-size: 17px; }
+  .blk.full { border-color: var(--red); }
+  .blk.full b { color: var(--red); }
+  .blk[aria-pressed="true"] { border-color: var(--navy); box-shadow: inset 0 0 0 1.5px var(--navy); }
+  .blk[aria-pressed="true"] .r { color: var(--navy); font-weight: 700; }
+  .range-row .by { flex: 0 0 auto; font-size: 12px; color: var(--ink-soft); }
+  .range-stat { margin: 12px 0 0; }
+  .range-stat p { margin: 6px 0 0; font-size: 13px; color: var(--ink-soft); }
+  .range-stat b { color: var(--ink); }
+
+  .gain-box { margin: 20px 0 0; padding: 14px 14px 12px; border: 1.5px solid var(--rule); border-radius: 10px; }
+  .gain-label { margin: 0 0 8px; font-size: 13px; font-weight: 700; letter-spacing: .05em; }
+  .gain-num { margin: 8px 0 0; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .gain-num strong { font-family: var(--hand); font-weight: 600; font-size: 30px; color: var(--red); line-height: 1; }
+  .gain-num .was { font-family: var(--hand); font-weight: 600; font-size: 18px; color: var(--ink-soft); }
+  .gain-num .arrow { color: var(--ink-soft); }
+  .gain-num em { font-style: normal; font-size: 13px; font-weight: 700; color: var(--red); margin-left: auto; }
+  .gain-sub { margin: 4px 0 0; font-size: 12px; color: var(--ink-soft); }
+  .gain-sub.all { color: var(--red); font-weight: 700; font-size: 14px; }
 
   /* ---- 4択（1問ずつ） ---- */
   .quiz { max-width: 560px; margin: 0 auto; }
@@ -297,17 +356,50 @@ const progressKey = (l) => `vt3:progress:${l}`;
 const loadProgress = (l) => store.get(progressKey(l)) || {};
 const saveProgress = (l, p) => store.set(progressKey(l), p);
 
-function listStats(list) {
-  const p = loadProgress(list.id);
-  let passed = 0, marked = 0;
-  for (const w of list.W) {
-    const r = p[w.no];
-    if (!r) continue;
-    if (r.p) passed++;
-    if (r.m) marked++;
-  }
-  return { passed, marked };
+// ---- 進み具合 ----
+// 単語ごとの状態  p: 合格 / a: あと1回で合格 / m: ×印 / n: まだ
+function wordState(r) {
+  if (!r) return "n";
+  if (r.p) return "p";
+  if (r.m) return "m";
+  return r.s >= 1 ? "a" : "n";
 }
+// 番号 s〜e の単語を状態ごとに数える（%は「合格」の割合）
+function countStates(list, prog, s = list.minNo, e = list.maxNo) {
+  const c = { p: 0, a: 0, m: 0, n: 0, total: 0 };
+  for (const w of list.W) {
+    if (w.no < s || w.no > e) continue;
+    c[wordState(prog[w.no])] += 1;
+    c.total += 1;
+  }
+  return c;
+}
+const pctOf = (n, total) => (total ? Math.floor((n / total) * 100) : 0); // 切り捨て（全部合格のときだけ100%）
+const share = (n, total) => (total ? (n / total) * 100 : 0);
+// 横の帯グラフ。gain = 今回のテストで新しく合格した語数（しま模様で伸びる）
+function stackBar(c, cls = "", gain = 0) {
+  const g = Math.max(0, Math.min(gain, c.p));
+  return `<div class="sbar ${cls}" aria-hidden="true">`
+    + `<i class="p" style="width:${share(c.p - g, c.total)}%"></i>`
+    + (g ? `<i class="g" style="width:${share(g, c.total)}%"></i>` : "")
+    + `<i class="a" style="width:${share(c.a, c.total)}%"></i>`
+    + `<i class="m" style="width:${share(c.m, c.total)}%"></i></div>`;
+}
+function ringStyle(c) {
+  const p = share(c.p, c.total), a = p + share(c.a, c.total), m = a + share(c.m, c.total);
+  return `background:conic-gradient(var(--red) 0 ${p}%, var(--c-a) 0 ${a}%, var(--c-m) 0 ${m}%, var(--c-n) 0)`;
+}
+// 範囲タイル: 単語が多いリストは100語ずつ、少ないリストは50語ずつ
+function progressBlocks(list) {
+  const size = list.W.length > 600 ? 100 : 50;
+  const blocks = [];
+  for (let s = Math.floor((list.minNo - 1) / size) * size + 1; s <= list.maxNo; s += size) {
+    const e = Math.min(s + size - 1, list.maxNo);
+    if (list.W.some((w) => w.no >= s && w.no <= e)) blocks.push({ s, e });
+  }
+  return blocks;
+}
+
 function markedWords(list) {
   const p = loadProgress(list.id);
   return list.W.filter((w) => p[w.no] && p[w.no].m);
@@ -355,7 +447,9 @@ function makeQuestion(W, q) {
 }
 
 function startQuiz(list, nos, mode, meta) {
-  const quiz = { l: list.id, mode, ...meta, queue: shuffle(nos.slice()), i: 0, log: [], passed: [], t0: Date.now(), cur: null, done: false };
+  // base = はじめる前の合格語数（結果画面で「何%→何%」を出すため。復習はリスト全体）
+  const base = countStates(list, loadProgress(list.id), meta.s ?? list.minNo, meta.e ?? list.maxNo).p;
+  const quiz = { l: list.id, mode, ...meta, base, queue: shuffle(nos.slice()), i: 0, log: [], passed: [], t0: Date.now(), cur: null, done: false };
   store.set(QUIZ_KEY, quiz);
   if (location.hash === "#quiz") route(); else location.hash = "#quiz";
 }
@@ -374,6 +468,9 @@ function showHome() {
   const s0 = range.s || list.minNo, e0 = range.e || list.maxNo, n0 = range.n || 20;
   const marked = markedWords(list);
   const prog = loadProgress(list.id);
+  const all = countStates(list, prog);
+  const pAll = pctOf(all.p, all.total);
+  const tiles = [{ s: list.minNo, e: list.maxNo, all: true }, ...progressBlocks(list)];
   const quiz = store.get(QUIZ_KEY);
   const resumable = quiz && !quiz.done && findList(quiz.l) && Array.isArray(quiz.queue) && quiz.i < quiz.queue.length;
   document.title = "英単語テスト";
@@ -395,20 +492,45 @@ function showHome() {
       ${LISTS.length > 1 ? `
       <div class="form-row"><span class="label">単語リスト</span>
         <div class="picker">${LISTS.map((l) => {
-          const st = listStats(l);
+          const st = countStates(l, loadProgress(l.id));
           return `<label class="option"><input type="radio" name="l" value="${esc(l.id)}" ${l === list ? "checked" : ""}>
-            <span>${esc(l.name)}<small>${l.W.length}語・合格 ${st.passed}語・×印 ${st.marked}語</small></span></label>`;
+            <span class="opt-body">${esc(l.name)}<small>${l.W.length}語・合格 ${pctOf(st.p, st.total)}%（${st.p}語）${st.m ? `・×印 ${st.m}語` : ""}</small>${stackBar(st, "mini")}</span></label>`;
         }).join("")}
         </div>
       </div>` : ""}
 
+      <h2 class="section-title">進み具合</h2>
+      <div class="prog">
+        <div class="ring" style="${ringStyle(all)}" role="img" aria-label="${esc(list.name)} 合格 ${pAll}%">
+          <div class="ring-in"><strong>${pAll}<span>%</span></strong><small>合格</small></div>
+        </div>
+        <ul class="legend">
+          <li><span class="sw p"></span>合格<span class="v">${all.p}<small>語</small></span></li>
+          <li><span class="sw a"></span>あと1回で合格<span class="v">${all.a}<small>語</small></span></li>
+          <li><span class="sw m"></span>×印<span class="v">${all.m}<small>語</small></span></li>
+          <li><span class="sw n"></span>まだ<span class="v">${all.n}<small>語</small></span></li>
+        </ul>
+      </div>
+      <p class="prog-note">${esc(list.name)} 全${all.total}語のうち <b>${all.p}語</b> 合格。${all.p === all.total ? "全部合格です！" : `のこり ${all.total - all.p}語。`}2回続けて正解すると合格になります。</p>
+
       <h2 class="section-title">テストを解く</h2>
-      <div class="form-row"><span class="label">出題範囲（単語番号）</span>
+      <div class="form-row"><span class="label">出題範囲（タップで選ぶ）</span>
+        <div class="blocks" id="blocks">
+          ${tiles.map((b) => {
+            const c = countStates(list, prog, b.s, b.e);
+            const full = c.total > 0 && c.p === c.total;
+            const pc = pctOf(c.p, c.total);
+            const name = b.all ? "全部" : `No.${b.s}〜${b.e}`;
+            return `<button class="blk ${full ? "full" : ""}" data-s="${b.s}" data-e="${b.e}" aria-pressed="false" style="--f:${share(c.p, c.total)}%" aria-label="${name}　合格${pc}%"><span class="r">${b.all ? "全部" : `${b.s}–${b.e}`}</span><b>${full ? "合格" : `${pc}%`}</b></button>`;
+          }).join("")}
+        </div>
         <div class="range-row">
+          <span class="by">番号で</span>
           <input class="field" id="s" type="number" inputmode="numeric" min="${list.minNo}" max="${list.maxNo}" value="${s0}" aria-label="開始番号">
           <span>〜</span>
           <input class="field" id="e" type="number" inputmode="numeric" min="${list.minNo}" max="${list.maxNo}" value="${e0}" aria-label="終了番号">
         </div>
+        <div class="range-stat" id="rangeStat"></div>
       </div>
       <div class="form-row"><label class="label" for="n">問題数</label><input class="field" id="n" type="number" inputmode="numeric" min="1" value="${n0}"></div>
       <p class="hint" id="hint" role="alert"></p>
@@ -444,10 +566,27 @@ function showHome() {
     n: parseInt(document.getElementById("n").value, 10),
   });
   const bookLink = document.getElementById("book");
-  ["s", "e"].forEach((id) => document.getElementById(id).addEventListener("input", () => {
+  const sIn = document.getElementById("s"), eIn = document.getElementById("e");
+  // 範囲が変わったら: タイルの選択・この範囲の進み具合・単語帳のリンクを合わせる
+  const syncRange = () => {
     const r = readRange();
-    if (r.s >= 1 && r.e >= r.s) bookLink.href = bookUrl(list.id, r.s, r.e);
+    const ok = r.s >= 1 && r.e >= r.s;
+    document.querySelectorAll(".blk").forEach((b) => b.setAttribute("aria-pressed", String(ok && +b.dataset.s === r.s && +b.dataset.e === r.e)));
+    const box = document.getElementById("rangeStat");
+    if (!ok) { box.innerHTML = ""; return; }
+    bookLink.href = bookUrl(list.id, r.s, r.e);
+    const c = countStates(list, prog, r.s, r.e);
+    box.innerHTML = c.total
+      ? `${stackBar(c)}<p>No.${r.s}〜${r.e}（${c.total}語）　合格 <b>${c.p}語・${pctOf(c.p, c.total)}%</b>${c.m ? `　×印 ${c.m}語` : ""}</p>`
+      : "";
+  };
+  document.querySelectorAll(".blk").forEach((b) => b.addEventListener("click", () => {
+    sIn.value = b.dataset.s;
+    eIn.value = b.dataset.e;
+    syncRange();
   }));
+  [sIn, eIn].forEach((el) => el.addEventListener("input", syncRange));
+  syncRange();
 
   document.getElementById("start").addEventListener("click", () => {
     const r = readRange();
@@ -590,6 +729,12 @@ function finishQuiz(quiz) {
   const time = `${Math.floor(sec / 60)}分${sec % 60}秒`;
   const left = markedWords(list).length;
   const word = (no) => list.byNo.get(no);
+  // 進み具合: はじめる前（quiz.base）→ いま
+  const now = countStates(list, loadProgress(list.id), isReview ? list.minNo : quiz.s, isReview ? list.maxNo : quiz.e);
+  const hasBase = typeof quiz.base === "number";
+  const gain = hasBase ? now.p - quiz.base : 0;
+  const pNow = pctOf(now.p, now.total);
+  const pWas = hasBase ? pctOf(quiz.base, now.total) : pNow;
   document.title = isReview ? "復習の結果" : `${correct}/${total}　テストの結果`;
 
   $app.innerHTML = `
@@ -606,6 +751,15 @@ function finishQuiz(quiz) {
       <div class="chips">
         ${quiz.passed.length ? `<span class="pass-chip">合格 ${quiz.passed.length}語</span>` : ""}
         ${!isReview && wrongNos.length ? `<span class="x-chip">×印 ${wrongNos.length}語</span>` : ""}
+      </div>
+
+      <div class="gain-box">
+        <p class="gain-label">${isReview ? `${esc(list.name)} 全体` : `No.${quiz.s}〜${quiz.e}`}の進み具合（合格した単語）</p>
+        ${stackBar(now, "big", gain)}
+        <p class="gain-num">${pWas !== pNow ? `<span class="was">${pWas}%</span><span class="arrow">→</span>` : ""}<strong>${pNow}%</strong>${gain > 0 ? `<em>+${gain}語 合格</em>` : ""}</p>
+        ${now.total && now.p === now.total
+          ? `<p class="gain-sub all">この範囲は全部合格！</p>`
+          : `<p class="gain-sub">${now.total}語のうち ${now.p}語 合格・のこり ${now.total - now.p}語</p>`}
       </div>
 
       ${!isReview && wrongNos.length ? `
