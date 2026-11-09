@@ -446,6 +446,16 @@ function makeQuestion(W, q) {
   return { choices: shuffle([q.ja, ...dummies]), answer: q.ja };
 }
 
+// テストに出す単語を選ぶ: まだ合格していない単語を優先し、足りないときだけ合格済みを混ぜる
+function pickNos(list, s, e, n) {
+  const prog = loadProgress(list.id);
+  const target = list.W.filter((w) => w.no >= s && w.no <= e);
+  const passed = (w) => !!(prog[w.no] && prog[w.no].p);
+  const notYet = shuffle(target.filter((w) => !passed(w)).map((w) => w.no));
+  const done = shuffle(target.filter(passed).map((w) => w.no));
+  return [...notYet, ...done].slice(0, Math.min(n, target.length));
+}
+
 function startQuiz(list, nos, mode, meta) {
   // base = はじめる前の合格語数（結果画面で「何%→何%」を出すため。復習はリスト全体）
   const base = countStates(list, loadProgress(list.id), meta.s ?? list.minNo, meta.e ?? list.maxNo).p;
@@ -578,6 +588,7 @@ function showHome() {
     const c = countStates(list, prog, r.s, r.e);
     box.innerHTML = c.total
       ? `${stackBar(c)}<p>No.${r.s}〜${r.e}（${c.total}語）　合格 <b>${c.p}語・${pctOf(c.p, c.total)}%</b>${c.m ? `　×印 ${c.m}語` : ""}</p>`
+        + `<p>${c.p === c.total ? "全部合格しているので、復習として出題します。" : c.p ? `まだ合格していない ${c.total - c.p}語から先に出題します。` : ""}</p>`
       : "";
   };
   document.querySelectorAll(".blk").forEach((b) => b.addEventListener("click", () => {
@@ -597,8 +608,7 @@ function showHome() {
     if (!target.length) { hint.textContent = `この範囲に単語がありません（No.${list.minNo}〜${list.maxNo}）`; return; }
     const ranges = { ...((store.get("vt3:prefs") || {}).ranges || {}), [list.id]: { s: r.s, e: r.e, n: r.n } };
     savePrefs({ l: list.id, ranges });
-    const nos = shuffle(target.map((w) => w.no)).slice(0, Math.min(r.n, target.length));
-    startQuiz(list, nos, "test", { s: r.s, e: r.e });
+    startQuiz(list, pickNos(list, r.s, r.e, r.n), "test", { s: r.s, e: r.e });
   });
 
   const reviewBtn = document.getElementById("review");
@@ -783,9 +793,7 @@ function finishQuiz(quiz) {
   if (reviewBtn) reviewBtn.addEventListener("click", () => startReview(list));
   const again = document.getElementById("again");
   if (again) again.addEventListener("click", () => {
-    const target = list.W.filter((w) => w.no >= quiz.s && w.no <= quiz.e);
-    const nos = shuffle(target.map((w) => w.no)).slice(0, Math.min(quiz.queue.length, target.length));
-    startQuiz(list, nos, "test", { s: quiz.s, e: quiz.e });
+    startQuiz(list, pickNos(list, quiz.s, quiz.e, quiz.queue.length), "test", { s: quiz.s, e: quiz.e });
   });
   document.getElementById("home").addEventListener("click", () => { location.hash = ""; });
 }
